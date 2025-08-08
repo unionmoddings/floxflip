@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -160,9 +160,39 @@
       padding: 16px 24px;
       overflow: hidden;
     }
-    /* Left Panel */
-    #left-panel {
-      flex: 1.3;
+    /* Left Panel - Games List */
+    #games-list {
+      width: 180px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 16px 0;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+      user-select: none;
+    }
+    #games-list h2 {
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0 0 16px 0;
+      text-align: center;
+      user-select: none;
+      padding: 0 16px;
+    }
+    .game-tab {
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .game-tab:hover {
+      background: #1d2a4c;
+    }
+    .game-tab.active {
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+    }
+    /* Game Panel */
+    #game-panel {
+      flex: 1;
       background: var(--card-bg);
       border-radius: 16px;
       display: flex;
@@ -172,21 +202,12 @@
       overflow-y: auto;
       user-select: none;
     }
-    #left-panel h2 {
-      color: var(--accent);
-      font-weight: 700;
-      margin-top: 0;
-      margin-bottom: 16px;
-      text-align: center;
-      user-select: none;
-    }
     /* Games styles */
     .game {
-      background: #1d2a4c;
-      border-radius: 12px;
-      padding: 16px 20px;
-      margin-bottom: 24px;
-      box-shadow: inset 0 0 10px #15243a;
+      display: none;
+    }
+    .game.active {
+      display: block;
     }
     /* --- Coinflip --- */
     #coinflip .choice-btns {
@@ -270,6 +291,7 @@
       gap: 8px;
       user-select: none;
       justify-content: center;
+      margin: 16px 0;
     }
     .mine-cell {
       width: 40px;
@@ -299,6 +321,26 @@
       background: var(--success);
       color: #000;
     }
+    #mines-cashout-btn {
+      width: 100%;
+      padding: 12px 0;
+      border: none;
+      border-radius: 10px;
+      background: var(--success);
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      color: #000;
+      transition: background 0.3s;
+      margin-top: 8px;
+    }
+    #mines-cashout-btn:hover:not(:disabled) {
+      background: #5bd47a;
+    }
+    #mines-cashout-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     /* Right Panel */
     #right-panel {
       width: 350px;
@@ -311,10 +353,13 @@
     }
     /* Activity Feed */
     #activity-feed {
-      flex: 1.1;
+      flex: 0 0 auto;
       padding: 16px 20px;
       overflow-y: auto;
       border-bottom: 1px solid #223350;
+      height: 200px;
+      min-height: 200px;
+      max-height: 200px;
     }
     #activity-feed h3 {
       margin: 0 0 8px 0;
@@ -346,6 +391,7 @@
       flex: 1;
       display: flex;
       flex-direction: column;
+      min-height: 0;
     }
     #chat h3 {
       margin: 8px 0 6px 0;
@@ -361,6 +407,7 @@
       background: var(--chat-bg);
       border-radius: 0 0 16px 16px;
       font-size: 14px;
+      min-height: 0;
     }
     .chat-message {
       margin-bottom: 10px;
@@ -432,18 +479,18 @@
     /* Scrollbar */
     #activity-feed::-webkit-scrollbar,
     #chat-messages::-webkit-scrollbar,
-    #left-panel::-webkit-scrollbar {
+    #game-panel::-webkit-scrollbar {
       width: 8px;
     }
     #activity-feed::-webkit-scrollbar-thumb,
     #chat-messages::-webkit-scrollbar-thumb,
-    #left-panel::-webkit-scrollbar-thumb {
+    #game-panel::-webkit-scrollbar-thumb {
       background: #304a85;
       border-radius: 8px;
     }
     #activity-feed::-webkit-scrollbar-track,
     #chat-messages::-webkit-scrollbar-track,
-    #left-panel::-webkit-scrollbar-track {
+    #game-panel::-webkit-scrollbar-track {
       background: transparent;
     }
     /* Responsive */
@@ -452,14 +499,23 @@
         flex-direction: column;
         padding: 12px 14px;
       }
+      #games-list {
+        width: 100%;
+        margin-bottom: 16px;
+      }
       #right-panel {
         width: 100%;
         height: 360px;
         margin-top: 16px;
       }
-      #left-panel {
+      #game-panel {
         border-radius: 14px 14px 0 0;
         max-height: 400px;
+      }
+      #activity-feed {
+        height: 180px;
+        min-height: 180px;
+        max-height: 180px;
       }
     }
   </style>
@@ -488,8 +544,29 @@
       <button id="logout-btn" aria-label="Logout">Log Out</button>
     </header>
     <main id="content" role="main">
-      <section id="left-panel" tabindex="0" aria-label="Games area">
+      <!-- Games List Sidebar -->
+      <aside id="games-list" aria-label="Games list">
         <h2>Games</h2>
+        <div id="mines-tab" class="game-tab active" data-game="mines">Mines</div>
+        <div id="coinflip-tab" class="game-tab" data-game="coinflip">Coinflip</div>
+      </aside>
+
+      <!-- Game Panel -->
+      <section id="game-panel" tabindex="0" aria-label="Game area">
+        <!-- Mines Game -->
+        <section id="mines" class="game active" aria-label="Mines game">
+          <h3>Mines</h3>
+          <div class="controls">
+            <label for="mines-bet">Bet:</label>
+            <input type="number" id="mines-bet" placeholder="Bet amount" min="1" step="1" aria-label="Mines bet amount" />
+            <label for="mines-mines-count">Mines:</label>
+            <input type="number" id="mines-mines-count" placeholder="Mines (1-5)" min="1" max="5" step="1" value="3" aria-label="Number of mines" />
+            <button id="mines-start-btn" aria-label="Start Mines Game">Start Game</button>
+          </div>
+          <div id="mines-msg" role="alert" aria-live="assertive"></div>
+          <div id="mines-board" aria-label="Mines game board" role="grid"></div>
+          <button id="mines-cashout-btn" disabled aria-label="Cash out">Cash Out</button>
+        </section>
 
         <!-- Coinflip Game -->
         <section id="coinflip" class="game" aria-label="Coinflip game">
@@ -501,21 +578,6 @@
           </div>
           <div id="coinflip-msg" role="alert" aria-live="assertive"></div>
         </section>
-
-        <!-- Mines Game -->
-        <section id="mines" class="game" aria-label="Mines game">
-          <h3>Mines</h3>
-          <div class="controls">
-            <label for="mines-bet">Bet:</label>
-            <input type="number" id="mines-bet" placeholder="Bet amount" min="1" step="1" aria-label="Mines bet amount" />
-            <label for="mines-mines-count">Mines:</label>
-            <input type="number" id="mines-mines-count" placeholder="Mines (1-5)" min="1" max="5" step="1" value="3" aria-label="Number of mines" />
-            <button id="mines-start-btn" aria-label="Start Mines Game">Start Game</button>
-          </div>
-          <div id="mines-msg" role="alert" aria-live="assertive"></div>
-          <div id="mines-board" aria-label="Mines game board" role="grid"></div>
-        </section>
-
       </section>
 
       <aside id="right-panel" aria-label="Side panel">
@@ -588,6 +650,10 @@
   const soundWin = document.getElementById('sound-win');
   const soundLose = document.getElementById('sound-lose');
   const soundClick = document.getElementById('sound-click');
+
+  // Game Tabs
+  const gameTabs = document.querySelectorAll('.game-tab');
+  const games = document.querySelectorAll('.game');
 
   // Utils
   function hashPwd(pwd) {
@@ -736,6 +802,21 @@
     saveSession();
     showLoginScreen();
     showPopup('Logged out', 'info');
+  });
+
+  // Game Tab Switching
+  gameTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const gameId = tab.dataset.game;
+      
+      // Update active tab
+      gameTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      // Show selected game
+      games.forEach(game => game.classList.remove('active'));
+      document.getElementById(gameId).classList.add('active');
+    });
   });
 
   // Activity Feed (fake wins/losses)
@@ -911,6 +992,7 @@
   const minesBetInput = document.getElementById('mines-bet');
   const minesMinesCountInput = document.getElementById('mines-mines-count');
   const minesStartBtn = document.getElementById('mines-start-btn');
+  const minesCashoutBtn = document.getElementById('mines-cashout-btn');
   const minesBoard = document.getElementById('mines-board');
   const minesMsg = document.getElementById('mines-msg');
 
@@ -929,6 +1011,7 @@
     minesPositions = [];
     minesGameActive = false;
     minesPayoutMultiplier = 1;
+    minesCashoutBtn.disabled = true;
   }
 
   function generateMines() {
@@ -984,6 +1067,7 @@
       addFeedItem(currentUser.username, false, minesBet);
       revealAllMines();
       minesStartBtn.textContent = 'Start Game';
+      minesCashoutBtn.disabled = true;
     } else {
       // Safe cell
       cell.classList.add('safe', 'revealed');
@@ -991,20 +1075,30 @@
       playSound(soundWin);
       const payout = Math.floor(minesBet * minesPayoutMultiplier);
       updateMinesMsg(`Safe! Current payout: $${payout.toLocaleString()}`, 'var(--success)');
-      // User can keep clicking, or cash out manually (could add cash out later)
+      minesCashoutBtn.disabled = false;
+      
       if(revealedCells.size === (MINES_GRID_SIZE*MINES_GRID_SIZE - minesCount)) {
         // Win all safe spots revealed
-        minesGameActive = false;
-        currentUser.balance += payout;
-        updateBalance();
-        saveUsers();
-        updateMinesMsg(`You won $${payout.toLocaleString()}! All safe spots revealed!`, 'var(--success)');
-        addFeedItem(currentUser.username, true, payout);
-        minesStartBtn.textContent = 'Start Game';
-        revealAllMines();
+        cashOutMinesGame();
       }
     }
   }
+
+  function cashOutMinesGame() {
+    if(!minesGameActive) return;
+    
+    const payout = Math.floor(minesBet * minesPayoutMultiplier);
+    minesGameActive = false;
+    currentUser.balance += payout;
+    updateBalance();
+    saveUsers();
+    updateMinesMsg(`You cashed out $${payout.toLocaleString()}!`, 'var(--success)');
+    addFeedItem(currentUser.username, true, payout);
+    minesStartBtn.textContent = 'Start Game';
+    minesCashoutBtn.disabled = true;
+    revealAllMines();
+  }
+
   function revealAllMines() {
     minesBoard.querySelectorAll('.mine-cell').forEach(cell => {
       const idx = Number(cell.dataset.index);
@@ -1039,6 +1133,7 @@
     updateMinesMsg(`Game started! Avoid the ${minesCount} mines.`, 'var(--accent)');
     playSound(soundClick);
   }
+
   minesStartBtn.addEventListener('click', () => {
     if(minesGameActive) {
       // Restarting game resets it
@@ -1051,6 +1146,8 @@
       startMinesGame();
     }
   });
+
+  minesCashoutBtn.addEventListener('click', cashOutMinesGame);
 
   // Init app
   function init() {
